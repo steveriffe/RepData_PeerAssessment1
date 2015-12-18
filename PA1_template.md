@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 This assignment makes use of data from a personal activity monitoring device.
 This device collects data at 5 minute intervals through out the day. The data
 consists of two months of data from an anonymous individual collected during
@@ -19,15 +14,24 @@ format
 taken
 
 ## Loading and preprocessing the data
-```{r}
+
+```r
 unzip("activity.zip")
 activity <- read.csv("activity.csv", header = TRUE, stringsAsFactors = FALSE)
 
 str(activity)
+```
 
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : chr  "2012-10-01" "2012-10-01" "2012-10-01" "2012-10-01" ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+```
+
+```r
 ## dates are in the wrong class
 activity$date <- as.Date(activity$date)
-
 ```
 
 
@@ -39,7 +43,8 @@ activity$date <- as.Date(activity$date)
 2. Make a histogram of the total number of steps taken each day
 
 3. Calculate and report the mean and median of the total number of steps taken per day
-```{r}
+
+```r
 library(ggplot2)
 #aggregate the number of steps by date
 stepsday <- aggregate(activity$steps, by = list(activity$date), FUN = sum, na.rm = TRUE)
@@ -57,13 +62,26 @@ medianstepsday <- median(stepsday$Steps)
 #plot the histogram:
 ggplot(stepsday, aes(stepsday$Steps))+
   geom_histogram(binwidth = 500)
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
+```r
 #The mean number of steps taken per day is:
 meanstepsday
+```
 
+```
+## [1] 9354.23
+```
+
+```r
 #and the median number of steps taken per day is:
 medianstepsday
+```
 
+```
+## [1] 10395
 ```
 
 
@@ -73,7 +91,8 @@ medianstepsday
 1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
-```{r}
+
+```r
 library(ggplot2)
 stepsinterval <- aggregate(activity$steps, by = list(activity$interval), FUN = mean, na.rm = TRUE)
 names(stepsinterval) <- c("Interval", "Mean_Steps")
@@ -85,11 +104,22 @@ ggplot(stepsinterval, aes(Interval, Mean_Steps))+
   scale_x_continuous(breaks = round(seq(0,max(stepsinterval$Interval), by = 200),1))+
   geom_smooth(method = "loess")+
   geom_line()
+```
 
+```
+## Warning: Removed 8 rows containing missing values (geom_path).
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
+```r
 #The five minute interval with maximum mean number of steps is:
 max <- stepsinterval[which.max(stepsinterval$Mean_Steps),1]
 max
+```
 
+```
+## [1] 835
 ```
 
 
@@ -105,15 +135,28 @@ max
 4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? 
 
 What is the impact of imputing missing data on the estimates of the total daily number of steps?
-```{r}
+
+```r
 NAS <- sum(is.na(activity))
 #There are this many missing values:
 NAS
+```
 
+```
+## [1] 2304
+```
+
+```r
 Complete <- sum(complete.cases(activity))
 #And there are this many complete cases:
 Complete
+```
 
+```
+## [1] 15264
+```
+
+```r
 #We'll replace the missing intervals with the mean of the steps in the completed intervals:
 clean <- cbind(activity, stepsinterval[,2])
 names(clean)[4] <- "mean"
@@ -135,13 +178,29 @@ clean.medianstepsday <- median(cleanstepsday$Steps)
 #plot the histogram:
 ggplot(cleanstepsday, aes(cleanstepsday$Steps))+
   geom_histogram(binwidth = 500)
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
+```r
 #The mean number of steps taken per day is:
 clean.meanstepsday
+```
 
+```
+## [1] 10766.19
+```
+
+```r
 #and the median number of steps taken per day is:
 clean.medianstepsday
+```
 
+```
+## [1] 10766.19
+```
+
+```r
 # Adding in the imputed values increases both the mean and the median number of steps per day
 # The mean and median are now identical.
 ```
@@ -156,7 +215,8 @@ day.
 5-minute interval (x-axis) and the average number of steps taken, averaged
 across all weekday days or weekend days (y-axis). The plot should look
 something like the following, which was creating using simulated data:
-```{r}
+
+```r
 clean$weekday <- weekdays(clean$date)
 
 wkend <- subset(clean, clean$weekday == c("Saturday","Sunday"))
@@ -186,9 +246,20 @@ wdayplot <- ggplot(clean.wkday.interval, aes(Interval, Mean_Steps))+
 
 library(gridExtra)
 grid.arrange(wendplot, wdayplot, ncol=1)
+```
 
+```
+## Warning: Removed 10 rows containing missing values (geom_path).
+```
+
+```
+## Warning: Removed 8 rows containing missing values (geom_path).
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+
+```r
 # There is a very clear morning peak during the weekdays, while at the weekend 
 # activity is spread out a bit more evenly.
-
 ```
 
